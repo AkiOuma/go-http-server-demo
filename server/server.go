@@ -17,30 +17,32 @@ func ServerRun(ctx context.Context, port int) error {
 	stopper := controller.NewStopper(c)
 
 	// register handler
-	http.HandleFunc("/", home.HomePage)
-	http.HandleFunc("/stop", stopper.StopServer)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", home.HomePage)
+	mux.HandleFunc("/stop", stopper.StopServer)
 
 	// config server object and start
 	app := &http.Server{
-		Addr: ":" + strconv.Itoa(port),
+		Addr:    ":" + strconv.Itoa(port),
+		Handler: mux,
 	}
 
 	// monitor if server need to stop because of receving interupt signal
 	go func() {
 		<-ctx.Done()
 		if err := app.Shutdown(ctx); err != nil {
-			serverLog.Printf("HTTP server Shutdown: \n\t%v", err)
+			serverLog.Printf("HTTP server(%d) Shutdown: \n\t%v", port, err)
 		}
 	}()
 
 	// simulate if server stop by user calling stop api
 	go func() {
 		<-c
-		serverLog.Println("HTTP server Shutdown by api")
+		serverLog.Printf("HTTP server(%d) Shutdown by api", port)
 		if err := app.Shutdown(ctx); err != nil {
-			serverLog.Printf("HTTP server Shutdown: \n\t%v", err)
+			serverLog.Printf("HTTP server(%d) Shutdown: \n\t%v", port, err)
 		}
 	}()
-
+	log.Printf("starting http server at %d", port)
 	return app.ListenAndServe()
 }

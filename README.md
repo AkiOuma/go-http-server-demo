@@ -14,13 +14,14 @@
 ```
 .
 ├── cmd
-│   └── main.go 
+│   └── main.go
 ├── go.mod
 ├── go.sum
+├── Makefile
 ├── README.md
 ├── server
 │   ├── controller
-│   │   ├── home.go   
+│   │   ├── home.go
 │   │   └── stopper.go
 │   └── server.go
 └── signal-processor
@@ -38,14 +39,24 @@
 ## 实现效果
 
 ### 任务启动
-`go run ./cmd/ .`
+```bash
+$ make serve
+go run ./cmd/ .
+main           : 2021/11/05 21:38:48 starting http server at 8080
+main           : 2021/11/05 21:38:48 starting http server at 8082
+main           : 2021/11/05 21:38:48 starting http server at 8081
+```
 
 ### 获取数据
 ```bash
 $ curl http://localhost:8080
 {"message":"welcome"}
+$ curl http://localhost:8081
+{"message":"welcome"}
+$ curl http://localhost:8082
+{"message":"welcome"}
 ```
-可以正常获取到home的json数据
+可以正常获取到来自三个不同端口启动的http服务的home的json数据
 
 ### 停止http服务
 ```bash
@@ -54,24 +65,35 @@ $ curl http://localhost:8080/stop
 
 任务进程打印以下内容：
 ```bash
-http server    : 2021/11/04 23:43:28 HTTP server Shutdown by api
-signal receiver: 2021/11/04 23:43:28 stop receiving signal: 
+http server    : 2021/11/05 21:41:26 HTTP server(8080) Shutdown by api
+http server    : 2021/11/05 21:41:26 HTTP server(8080) Shutdown: 
         context canceled
-main           : 2021/11/04 23:43:28 Exit Reason: 
+signal receiver: 2021/11/05 21:41:26 stop receiving signal: 
+        context canceled
+http server    : 2021/11/05 21:41:26 HTTP server(8082) Shutdown: 
+        context canceled
+http server    : 2021/11/05 21:41:26 HTTP server(8081) Shutdown: 
+        context canceled
+main           : 2021/11/05 21:41:26 Exit Reason: 
         http: Server closed
 ```
-可以看到，http服务端在被终止后，Linux Signal接受服务的go routine也停止接受信号退出了
+可以看到，启动自8080端口的http服务端在被终止后，其余两个http服务以及Linux Signal接收服务的go routine也停止接受信号退出了。若终止请求来自8081或者8082端口的服务也会获得类似的结果
 
 ### 接受Interrupt信号
 ```bash
 $ go run ./cmd/
 ^C
-signal receiver: 2021/11/04 23:46:15 receive signal: 
+signal receiver: 2021/11/05 21:38:51 receive signal: 
         interrupt
-http server    : 2021/11/04 23:46:15 HTTP server Shutdown: 
+http server    : 2021/11/05 21:38:51 HTTP server(8081) Shutdown: 
         context canceled
-main           : 2021/11/04 23:46:15 Exit Reason: 
+http server    : 2021/11/05 21:38:51 HTTP server(8080) Shutdown: 
+        context canceled
+http server    : 2021/11/05 21:38:51 HTTP server(8082) Shutdown: 
+        context canceled
+main           : 2021/11/05 21:38:51 Exit Reason: 
         interrupt
+make: *** [serve] Error 1
 ```
 
-可以看到在接受了^C(Interrupt)信号后，Linux Signal接受服务停止后，http服务也终止了
+可以看到在接受了^C(Interrupt)信号后，Linux Signal接受服务停止后，三个启动自不同端口的http服务也终止了

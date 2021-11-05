@@ -17,14 +17,17 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// start http server
-	group.Go(func() error {
-		err := server.ServerRun(ctx, 8080)
-		if err != nil {
-			cancel()
-		}
-		return err
-	})
+	// start http server from port 8080 to 8082
+	for i := 8080; i < 8083; i++ {
+		port := i
+		group.Go(func() error {
+			err := server.ServerRun(ctx, port)
+			if err != nil {
+				cancel()
+			}
+			return err
+		})
+	}
 
 	// start linux signal mornitor
 	group.Go(func() error {
