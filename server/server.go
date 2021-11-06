@@ -28,21 +28,22 @@ func ServerRun(ctx context.Context, port int) error {
 	}
 
 	// monitor if server need to stop because of receving interupt signal
-	go func() {
-		<-ctx.Done()
-		if err := app.Shutdown(ctx); err != nil {
-			serverLog.Printf("HTTP server(%d) Shutdown: \n\t%v", port, err)
-		}
-	}()
-
 	// simulate if server stop by user calling stop api
 	go func() {
-		<-c
-		serverLog.Printf("HTTP server(%d) Shutdown by api", port)
-		if err := app.Shutdown(ctx); err != nil {
-			serverLog.Printf("HTTP server(%d) Shutdown: \n\t%v", port, err)
+		select {
+		case <-ctx.Done():
+			if err := app.Shutdown(ctx); err != nil {
+				serverLog.Printf("HTTP server(%d) Shutdown: \n\t%v", port, err)
+			}
+		case <-c:
+			serverLog.Printf("HTTP server(%d) Shutdown by api", port)
+			if err := app.Shutdown(ctx); err != nil {
+				serverLog.Printf("HTTP server(%d) Shutdown: \n\t%v", port, err)
+			}
 		}
+
 	}()
+
 	log.Printf("starting http server at %d", port)
 	return app.ListenAndServe()
 }
