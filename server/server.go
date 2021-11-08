@@ -35,13 +35,14 @@ func ServerRun(ctx context.Context, port int) error {
 			if err := app.Shutdown(ctx); err != nil {
 				serverLog.Printf("HTTP server(%d) Shutdown: \n\t%v", port, err)
 			}
+			return
 		case <-c:
 			serverLog.Printf("HTTP server(%d) Shutdown by api", port)
 			if err := app.Shutdown(ctx); err != nil {
 				serverLog.Printf("HTTP server(%d) Shutdown: \n\t%v", port, err)
 			}
+			return
 		}
-
 	}()
 
 	log.Printf("starting http server at %d", port)

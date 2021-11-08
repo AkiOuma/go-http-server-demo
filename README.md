@@ -65,16 +65,16 @@ $ curl http://localhost:8080/stop
 
 任务进程打印以下内容：
 ```bash
-http server    : 2021/11/05 21:41:26 HTTP server(8080) Shutdown by api
-http server    : 2021/11/05 21:41:26 HTTP server(8080) Shutdown: 
+http server    : 2021/11/08 20:57:00 HTTP server(8080) Shutdown by api
+signal receiver: 2021/11/08 20:57:00 stop receiving signal: 
         context canceled
-signal receiver: 2021/11/05 21:41:26 stop receiving signal: 
+http server    : 2021/11/08 20:57:00 HTTP server(8080) Shutdown: 
         context canceled
-http server    : 2021/11/05 21:41:26 HTTP server(8082) Shutdown: 
+http server    : 2021/11/08 20:57:00 HTTP server(8082) Shutdown: 
         context canceled
-http server    : 2021/11/05 21:41:26 HTTP server(8081) Shutdown: 
+http server    : 2021/11/08 20:57:00 HTTP server(8081) Shutdown: 
         context canceled
-main           : 2021/11/05 21:41:26 Exit Reason: 
+main           : 2021/11/08 20:57:00 Exit Reason: 
         http: Server closed
 ```
 可以看到，启动自8080端口的http服务端在被终止后，其余两个http服务以及Linux Signal接收服务的go routine也停止接受信号退出了。若终止请求来自8081或者8082端口的服务也会获得类似的结果
