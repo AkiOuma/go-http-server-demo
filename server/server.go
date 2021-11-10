@@ -2,11 +2,12 @@ package server
 
 import (
 	"context"
-	"http-server-demo/server/controller"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+
+	"http-server-demo/server/controller"
 )
 
 func ServerRun(ctx context.Context, port int) error {

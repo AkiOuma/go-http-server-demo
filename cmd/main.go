@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"http-server-demo/server"
-	signalprocessor "http-server-demo/signal-processor"
 	"log"
 	"os"
+
+	"http-server-demo/server"
+	signalprocessor "http-server-demo/signal-processor"
 
 	"golang.org/x/sync/errgroup"
 )
